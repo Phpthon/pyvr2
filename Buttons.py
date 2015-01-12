@@ -21,10 +21,9 @@ class Button():
        image = pygame.Surface([100,25], pygame.SRCALPHA, 32)
        image = image.convert_alpha()
 
-##    def buttonMotion():
-##        if event.type == pygame.MOUSEMOTION:
-##            if(x in range(100,25)) and ( y in range(100,25)):
-##                print "This will close the program"
+    def buttonMotion():
+        if event.type == pygame.MOUSEMOTION:
+                print "This will close the program"
        
                                          
 pygame.init()

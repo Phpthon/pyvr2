@@ -1,0 +1,30 @@
+class Event(object):
+	def __init__(self, name):
+		self.name = name
+
+	def istype(self, type):
+		return isinstance(self, type)
+
+class SliderEvent(Event):
+	def __init__(self, name, slidervalue):
+		Event.__init__(self, name)
+		self.slidervalue = slidervalue
+
+class MouseEvent(Event):
+	def __init__(self):
+		Event.__init__(self)
+
+class ButtonClickEvent(Event):
+	def __init__(self, name, text):
+		Event.__init__(self, name)
+		self.text = text
+
+class CheckBoxEvent(Event):
+	def __init__(self, name, checked):
+		Event.__init__(self, name)
+		self.checked = checked
+
+class LabelChange(Event):
+	def __init__(self, name, string):
+		Event.__init__(self, name)
+		self.string = string

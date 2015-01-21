@@ -1,6 +1,10 @@
 MAIN_FONT = "Lucida Sans"
 FONT_REGULAR = "assets/font/lsans.ttf"
 FONT_BOLD = "assets/font/lsans_b.ttf"
+SOFTWARE_VERSION = "v1.01"
+
+LEVEL_MAIN_MENU = 0
+LEVEL_GAME = 1
 
 import math
 
@@ -21,13 +25,13 @@ def degrees(radians):
 	return math.degrees(radians)
 
 # convert a bearing to its angle (degrees, radians, x direction, y direction, compass direction)
-def bearing_conversion(bearing):
+def bearing_conversion(bearing, velocity):
 	for i in range(0, len(angles)+1):
-		if bearing > angles[i] and bearing <= angles[i+1]:
+		if bearing >= angles[i] and bearing <= angles[i+1]:
 			angle = abs(bearing - azimuth[i])
-			xdir = xvals[i] * 5 * math.sin(radians(angle))
-			ydir = yvals[i] * 5 * math.cos(radians(angle))
+			xdir = xvals[i] * velocity * math.sin(radians(angle))
+			ydir = yvals[i] * velocity * math.cos(radians(angle))
 			return (angle, radians(angle), xdir, ydir, direct[i])
 
 
-print bearing_conversion(355)
+print bearing_conversion(0, 10)

@@ -3,6 +3,8 @@ from event.EventHandler import IEventHandler, EventDispatcher
 from event.Events import ButtonClickEvent, SliderEvent, CheckBoxEvent, LabelChange
 from misc.Constants import *
 import math
+import time
+import random
 
 class Component(pygame.Surface, IEventHandler):
 
@@ -23,15 +25,33 @@ class Component(pygame.Surface, IEventHandler):
 
 class Button(Component):
 
-	def __init__(self, size, parent, **kwargs):
+	icons = pygame.image.load("assets/img/button_icon_sprites.png")
+	background = pygame.image.load("assets/img/button_sprites.png")
 
-		Component.__init__(self, size, parent, **kwargs)
+	def __init__(self, text, sprite, parent, **kwargs):
+
+		Component.__init__(self, (100, 25), parent, **kwargs)
 		#self.fill((220,20,60))
 		self.clicked = False
 		self.hovered = False
 		self.init = False
+		self.text = text
+		self.size = (100, 25)
 
 		self.counter = 0
+
+		self.states = [Button.background.subsurface((0, 0, 100, 25)),
+						Button.background.subsurface((0, 25, 100, 25)),
+						Button.background.subsurface((0, 50, 100, 25))]
+		if sprite is not None:
+			self.icon_states = [Button.icons.subsurface((sprite*16, 0, 16, 16)),
+								Button.icons.subsurface((sprite*16, 16, 16, 16)),
+								Button.icons.subsurface((sprite*16, 32, 16, 16))]
+		else:
+			self.icon_states = None
+		self.offset = (6, 4)
+
+		self.font = pygame.font.Font(FONT_REGULAR, 12)
 
 
 	def update(self, timer, events):
@@ -59,14 +79,26 @@ class Button(Component):
 					self.clicked = False
 
 		if update or not self.init:
+			self.blit(self.parent.initial_image.subsurface(self.rect), (0,0))
 			self.init = True
 			if self.hovered:
 				if self.clicked:
-					self.fill((128,128,0))
+					self.blit(self.states[2], (0, 0))
+					if self.icon_states is not None:
+						self.blit(self.icon_states[2], self.offset)
 				else:
-					self.fill((255,0,0))
+					self.blit(self.states[1], (0, 0))
+					if self.icon_states is not None:
+						self.blit(self.icon_states[1], self.offset)
+				fontimg = self.font.render(self.text.upper(), True, (249, 249, 249))
+				self.blit(fontimg, (30, 8))
 			else:
-				self.fill((255,255,0))
+				self.blit(self.states[0], (0, 0))
+				if self.icon_states is not None:
+					self.blit(self.icon_states[0], self.offset)
+				fontimg = self.font.render(self.text.upper(), True, (125, 125, 125))
+				self.blit(fontimg, (30, 8))
+				
 			self.parent.blit(self, self.rect)
 			return True
 		return False
@@ -84,7 +116,6 @@ class CheckBox(Component):
 		self.checked = False
 
 		self.counter = 0
-
 		self.font = pygame.font.Font(FONT_REGULAR, 12).render(name, True, (92, 92, 92))
 		self.bg = CheckBox.sprites.subsurface((0, 0, 16, 16))
 		self.bg_hover = CheckBox.sprites.subsurface((0, 16, 16, 16))
@@ -113,8 +144,9 @@ class CheckBox(Component):
 
 		if update or not self.init:
 			self.init = True
-			self.fill(self.parent.background)
+			#self.fill(self.parent.background)
 			
+			self.blit(self.parent.initial_image.subsurface(self.rect), (0,0))
 			if self.hovered:
 				self.blit(self.bg_hover, (0, 0))
 			else:
@@ -165,14 +197,13 @@ class OrangeLabel(Component, IEventHandler):
 	def update(self, timer, events):
 
 		if not self.init:
-
 			self.init = True
-			self.fill(self.parent.background)
+			self.blit(self.parent.initial_image.subsurface(self.rect), (0,0))
 			#self.blit(self.sprite, (10, 10))
 			self.blit(self.title, (0, 0))
 			self.blit(self.value, (self.get_rect().width - self.value.get_rect().width, 0))
 			
-			self.parent.blit(self, self.rect)
+			#self.parent.blit(self, self.rect)
 
 			return True
 		return False
@@ -186,7 +217,7 @@ class Slider(Component):
 
 	slider_sprites = None
 
-	def __init__(self, parent, offset=(0, 0), **kwargs):
+	def __init__(self, title, parent, offset=(0, 0), increment=10.0, minvalue=10.0, maxvalue=100.0, **kwargs):
 		Component.__init__(self, (210, 38), parent, offset, **kwargs)
 
 		if Slider.slider_sprites == None:
@@ -201,9 +232,9 @@ class Slider(Component):
 		# user options
 		self.paddingright = 3
 		self.paddingleft = 3
-		self.increment = 10
-		self.minvalue = 10.0
-		self.maxvalue = 100.0
+		self.increment = increment
+		self.minvalue = minvalue
+		self.maxvalue = maxvalue
 		self.x, self.y = 0, 0
 
 		# init the track
@@ -240,7 +271,7 @@ class Slider(Component):
 		self.bar_rect_event.y = self.bar_rect.y + self.event_rect.y
 
 		self.font = pygame.font.Font(FONT_REGULAR, 12)
-		self.label = self.font.render("Velocity", True, (92, 92, 92))
+		self.label = self.font.render(title, True, (92, 92, 92))
 		self.init = False
 
 		self.hovered = False
@@ -290,10 +321,9 @@ class Slider(Component):
 					self.bar_rect.left = self.maxleft
 					self.bar_rect_event.left = self.track_rect_event.x + self.paddingleft
 
-			self.currentvalue = self.myround( ( (self.bar_rect.right - self.maxright + self.emptyspace ) * self.ratio) * self.increment + self.minvalue, self.increment)
+			self.currentvalue = self.myround( ( (self.bar_rect.left - self.maxleft ) * self.ratio) * self.increment + self.minvalue, self.increment)
 			
 			text = self.font.render(str(self.currentvalue), True, (41, 140, 218))
-
 
 			self.blit(text, (self.track_rect.right - self.paddingright - text.get_rect().width, self.track_rect.y - 20))
 			self.blit(self.label, (self.track_rect.left + self.paddingleft, self.track_rect.y - 20))
@@ -302,7 +332,7 @@ class Slider(Component):
 			self.blit(self.bar_image, self.bar_rect)
 
 			#print self.track_rect
-			self.parent.blit(self, self.rect)
+			#self.parent.blit(self, self.rect)
 
 			if self.currentvalue is not self.previousvalue:
 				EventDispatcher().send_event(SliderEvent(self.name, self.currentvalue))
@@ -327,5 +357,168 @@ class Slider(Component):
 	def myround(self, x, base=5):
 		return int(base * math.ceil(float(x)/base))
 
+
+class FlashingLabel(Component, IEventHandler):
+
+	def __init__(self, title, parent, **kwargs):
+		Component.__init__(self, (210, 16), parent, **kwargs)
+		IEventHandler.__init__(self)
+		self.font = pygame.font.Font(FONT_REGULAR, 12)
+		self.title = self.font.render(title, True, (92, 92, 92))
+		self.init = False
+
+		self.amount = 510
+		self.direction = -1
+		self.current = random.randint(0, 255)
+
+	def update(self, timer, events):
+
+		self.current += timer * self.direction * self.amount
+
+		if self.current > 255:
+			self.direction = -1
+			self.current = 255
+		elif self.current < 0:
+			self.direction = 1
+			self.current = 0
+
+		if not self.init:
+			self.init = True
+			self.blit(self.parent.initial_image.subsurface(self.rect), (0,0))
+			#self.blit(self.sprite, (10, 10))
+			self.blit(self.title, (0, 0))
+			#self.parent.blit(self, self.rect)
+
+			return True
+
+		self.set_alpha(math.ceil(self.current))
+		return True
+
 	def event_handler(self, event):
-		print "helllo"
+		if event.istype(LabelChange) and event.name is self.name:
+			self.value = self.font.render(event.string, True, (228, 174, 46))
+			self.init = False
+
+class MainTitle(Component):
+
+	def __init__(self, parent, **kwargs):
+		Component.__init__(self, (225, 100), parent, **kwargs)
+		self.font = pygame.font.Font(FONT_REGULAR, 12)
+		self.init = False
+
+	def update(self, timer, events):
+
+		if not self.init:
+			self.blit(self.parent.initial_image.subsurface(self.rect), (0,0))
+			title = self.font.render("Python Virtual Robot", True, (0, 0, 0))
+			value = self.font.render("Group B13A", True, (125, 125, 125))
+
+			img = pygame.image.load("assets/img/python_sml.png")
+			self.blit(img, (15, 15))
+			self.blit(title, (self.rect.width - title.get_rect().width, 40))
+			self.blit(value, (self.rect.width - value.get_rect().width, 60))
+			self.init = True
+			return True
+		return False
+
+class PlayTitle(Component, IEventHandler):
+
+	def __init__(self, title, parent, **kwargs):
+		Component.__init__(self, (210, 30), parent, **kwargs)
+		IEventHandler.__init__(self)
+		self.font = pygame.font.Font(FONT_REGULAR, 20)
+		self.title = self.font.render(title, True, (0, 0, 0))
+		self.init = False
+
+		self.amount = 510
+		self.direction = -1
+		self.current = random.randint(0, 255)
+
+	def update(self, timer, events):
+
+		self.current += timer * self.direction * self.amount
+
+		if self.current > 255:
+			self.direction = -1
+			self.current = 255
+		elif self.current < 0:
+			self.direction = 1
+			self.current = 0
+
+		if not self.init:
+			self.init = True
+			self.blit(self.parent.initial_image.subsurface(self.rect), (0,0))
+			#self.blit(self.sprite, (10, 10))
+			self.blit(self.title, (0, 0))
+			#self.parent.blit(self, self.rect)
+
+		self.set_alpha(math.ceil(self.current))
+		return True
+
+	def event_handler(self, event):
+		if event.istype(LabelChange) and event.name is self.name:
+			self.value = self.font.render(event.string, True, (228, 174, 46))
+			self.init = False
+
+class TrafficLight(Component):
+
+	def __init__(self, parent, **kwargs):
+		Component.__init__(self, (41, 88), parent, **kwargs)
+		self.init = False
+
+		lights = pygame.image.load("assets/img/trafficlights.png")
+		self.red = lights.subsurface(0, 0, 15, 15)
+		self.yellow = lights.subsurface(0, 15, 15, 15)
+		self.green = lights.subsurface(0, 30, 15, 15)
+
+		self.bg = pygame.image.load("assets/img/trafficlight.png")
+
+		self.amount = 510
+		self.direction = -1
+		self.current = random.randint(0, 255)
+
+		self.font = pygame.font.Font(FONT_REGULAR, 20)
+		self.title = self.font.render("T", True, (255, 255, 255))
+		self.title.set_alpha(0)
+
+		self.timer = 0
+
+		self.fill(self.parent.background)
+
+	def update(self, timer, events):
+
+		self.timer += timer
+		self.current += timer * self.direction * self.amount
+		
+		if self.current > 255:
+			self.direction = -1
+			self.current = 255
+		elif self.current < 0:
+			self.direction = 1
+			self.current = 0
+
+		if not self.init:
+			self.init = True
+			self.blit(self.parent.initial_image.subsurface(self.rect).copy(), (0,0))
+		self.blit(self.bg, self.bg.get_rect())
+		
+		if self.timer < 10:
+			if self.timer > 2:
+				self.blit(self.red, (13, 15))
+			elif self.timer > 1:
+				self.blit(self.yellow, (13, 38))
+			else:
+				self.blit(self.green, (13, 60))
+		else:
+			if self.timer < 12:
+				self.blit(self.red, (13, 15))
+				self.blit(self.yellow, (13, 38))
+			elif self.timer < 11:
+				self.blit(self.red, (13, 15))
+			elif self.timer > 12:
+				self.blit(self.green, (13, 60))
+		
+
+
+		#self.set_alpha(math.ceil(self.current))
+		return True

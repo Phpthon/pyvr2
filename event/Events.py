@@ -28,3 +28,8 @@ class LabelChange(Event):
 	def __init__(self, name, string):
 		Event.__init__(self, name)
 		self.string = string
+
+class LevelChangeEvent(Event):
+	def __init__(self, name, level):
+		Event.__init__(self, name)
+		self.level = level

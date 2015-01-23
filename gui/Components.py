@@ -183,10 +183,8 @@ class Title(Component):
 
 class OrangeLabel(Component, IEventHandler):
 
-	sprites = pygame.image.load("assets/img/title_sprites.png")
-
-	def __init__(self, title, value, parent, **kwargs):
-		Component.__init__(self, (210, 16), parent, **kwargs)
+	def __init__(self, title, value, parent, size=(210, 16), **kwargs):
+		Component.__init__(self, size, parent, **kwargs)
 		IEventHandler.__init__(self)
 		self.font = pygame.font.Font(FONT_REGULAR, 12)
 		self.title = self.font.render(title, True, (92, 92, 92))
@@ -209,7 +207,7 @@ class OrangeLabel(Component, IEventHandler):
 		return False
 
 	def event_handler(self, event):
-		if event.istype(LabelChange) and event.name is self.name:
+		if event.istype(LabelChange) and event.name == self.name:
 			self.value = self.font.render(event.string, True, (228, 174, 46))
 			self.init = False
 

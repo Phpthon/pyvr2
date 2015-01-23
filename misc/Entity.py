@@ -8,9 +8,42 @@ import copy
 # robot and treasure could inherit this and both contain an update method?
 #class Entity
 
+class Landmark(object):
+	def __init__(self, **landmark):
+		self.name = landmark["name"]
+		self.rect = pygame.Rect(landmark["coords"][0], landmark["coords"][1], landmark["dimensions"][0], landmark["dimensions"][1])
+
+class Treasure(pygame.sprite.Sprite):
+	def __init__(self, parent):
+		pygame.sprite.Sprite.__init__(self)
+		# treasure needs to collide with any of the
+		self.init = False
+		self.parent = parent
+		# put the treasure at a random position on the map
+		self.x = random.randint(50, self.parent.rect.width - 100)
+		self.y = random.randint(50, self.parent.rect.height - 100)
+		self.rect = pygame.Rect(self.x, self.y, 32, 32)
+		self.image = pygame.image.load(json_settings["treasure_img"])
+
+		self.score = 100
+
+	def update(self, timer, events):
+
+		if self.parent.display_treasures:
+
+			if not self.init:
+				self.init = True
+				#self.blit(self.parent.initial_image.subsurface(self.rect), (0,0))
+				#self.blit(self.sprite, (10, 10))
+				#self.parent.mapimg.blit(self.image, self.rect)
+			#self.image.set_alpha(math.ceil(self.current))
+			self.parent.blit(self.image, self.rect)
+
 class Robot(pygame.sprite.Sprite):
 
 	def __init__(self, parent, x=150, y=150):
+		self.type = "ai"
+
 		self.image = pygame.image.load("assets/img/plane.png")
 		self.image_static = self.image.copy()
 		self.rect = self.image.get_rect().copy()
@@ -21,7 +54,7 @@ class Robot(pygame.sprite.Sprite):
 		self.y = self.rect.y
 
 		self.bearing = 135
-		self.velocity = 10
+		self.velocity = 200
 
 		self.parent = parent
 
@@ -34,14 +67,17 @@ class Robot(pygame.sprite.Sprite):
 		self.timer = 0
 
 		self.collisioncount = 0
+		self.score = 0
 
-	def update(self, time, events, entities):
+	def update(self, time, events):
 
 		self.previous_rect = self.rect.copy()
+		'''
 		for event in events:
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				if self.rect.collidepoint(event.pos):
 					print("robot clicked")
+		'''
 
 		self.timer += time
 
@@ -57,6 +93,10 @@ class Robot(pygame.sprite.Sprite):
 
 		self.rect.x = self.x
 		self.rect.y = self.y
+
+		# draw the path behind the entity?
+		#pygame.draw.line(self.parent.mapimg, (151,174,200), (self.x + self.rect.width/2, self.y + self.rect.height/2), (self.x + self.rect.width/2, self.y - 1 + self.rect.height/2))
+		#pygame.draw.circle(self.parent.mapimg, (151,174,200), (self.rect.center[0], self.rect.center[1]), 1)
 
 		'''
 		entities1 = copy.copy(entities)
@@ -90,9 +130,3 @@ class Robot(pygame.sprite.Sprite):
 		if value > 360: value -= 360
 		if value < 0: value += 360
 		self.bearing = value
-
-
-class Landmark(pygame.sprite.Sprite):
-
-	def __init__(self):
-		pygame.sprite.Sprite.__init__(self)

@@ -1,22 +1,26 @@
 import pygame
 import sys
 from event.EventHandler import *
-from event.Events import ButtonClickEvent, LevelChangeEvent
+from event.Events import *
 from misc.Constants import *
 from map.Levels import GameLevel, MainMenu, PauseMenu
+import datetime
+import time
 
 class GameEngine(IEventHandler, object):
 
 	def __init__(self):
 		IEventHandler.__init__(self)
 		pygame.init()
+		pygame.display.set_caption(json_settings["title"])
 		self.display = None
 		self.level = None
 		self.changinglevels = False
 		self.fps = 120
 		self.clock = pygame.time.Clock()
 		self.ticktime = self.clock.tick(self.fps)
-
+		self.update_timer = 0
+		self.time_running = 0
 		self.paused = False
 
 	def init(self):
@@ -26,6 +30,8 @@ class GameEngine(IEventHandler, object):
 		while 1:
 			self.ticktime = self.clock.tick(self.fps)
 			ticktimeseconds = self.ticktime / 1000.0
+			self.update_timer += ticktimeseconds
+			self.time_running += ticktimeseconds
 			events = pygame.event.get()
 
 			for event in events:
@@ -35,10 +41,7 @@ class GameEngine(IEventHandler, object):
 
 			if self.paused:
 				if not self.pause_menu.init:
-					self.pause_menu.set_alpha(35)
-					print("done")
-					#self.pause_menu.blit(self.display, (0, 0))
-					#self.pause_menu.gui.redraw_initial()
+					self.pause_menu.set_alpha(20)
 					self.pause_menu.init = True
 				self.display.blit(self.pause_menu, (0, 0))
 				self.pause_menu.update(ticktimeseconds, events)
@@ -46,6 +49,12 @@ class GameEngine(IEventHandler, object):
 			else:
 				self.level.update(ticktimeseconds, events)
 				self.display.blit(self.level, self.level.get_rect())
+
+			if self.update_timer > 0.25:
+				self.update_timer = 0
+				EventDispatcher().send_event(LabelChange("fps", str(math.ceil(self.clock.get_fps()))))
+				EventDispatcher().send_event(LabelChange("time", time.strftime("%H:%M:%S", time.gmtime(self.time_running))))
+				EventDispatcher().send_event(LabelChange("current_time", time.strftime("%H:%M:%S", time.gmtime())))
 
 			pygame.display.flip()
 

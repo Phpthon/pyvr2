@@ -26,7 +26,7 @@ class Gui(pygame.Surface):
 		software_label = font.render("Software Version", True, (92, 92, 92))
 		self.blit(software_label, (15, rectangle.center[1] - (software_label.get_rect().height / 2)))
 
-		software_version = font.render(SOFTWARE_VERSION, True, (92, 92, 92))
+		software_version = font.render(json_settings["version"], True, (92, 92, 92))
 		self.blit(software_version, (rectangle.right - software_version.get_rect().width - 15, rectangle.center[1] - (software_version.get_rect().height / 2)))
 
 		self.parent.blit(self, self.rect)

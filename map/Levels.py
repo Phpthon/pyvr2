@@ -6,7 +6,7 @@ from event.Events import SliderEvent, CheckBoxEvent, ButtonClickEvent, LabelChan
 from threading import Thread
 from time import sleep
 from misc.Constants import *
-from misc.Entity import Robot
+from misc.Entity import *
 import random
 
 class Level(pygame.Surface):
@@ -15,7 +15,7 @@ class Level(pygame.Surface):
 		pygame.Surface.__init__(self, size)
 
 	def update(self, time, events):
-		pass
+		raise NotImplementedError
 
 class MainMenu(Level, IEventHandler):
 
@@ -62,65 +62,97 @@ class GameLevel(Level):
 		test = MainTitle(self.gui, offset=(0, 0))
 		self.gui.add_component(test)
 
-		test = Slider("Velocity", self.gui, offset=(25, 130), increment=10.0, minvalue=150.0, maxvalue=300.0)
+		test = OrangeLabel("", "0.0", self.gui, offset=(155, 20), size=(70, 16))
+		test.name = "current_time"
+		self.gui.add_component(test)
+
+		test = Title("Robot 1 : User Controlled", self.gui, 0, offset=(25, 100))
+		self.gui.add_component(test)
+
+		test = Slider("Velocity", self.gui, offset=(25, 145), increment=10.0, minvalue=150.0, maxvalue=300.0)
 		test.name = "velocity"
 		self.gui.add_component(test)
 
-		test = Slider("Bearing", self.gui, offset=(25, 180), increment=10.0, minvalue=0.0, maxvalue=360.0)
+		test = Slider("Bearing", self.gui, offset=(25, 190), increment=10.0, minvalue=0.0, maxvalue=360.0)
 		test.name = "bearing"
 		self.gui.add_component(test)
 
-		test1 = FlashingLabel("Pulsating Label", self.gui, offset=(25, 300))
-		test1.name = "test"
-		self.gui.add_component(test1)
-
-		test1 = TrafficLight(self.gui, offset=(200, 300))
-		test1.name = "light"
-		self.gui.add_component(test1)
-
-		test1 = Button("Pause", 3, self.gui, offset=(80, 325))
-		test1.name = "pause"
-		self.gui.add_component(test1)
-
-		test = Button("Main Menu", 1, self.gui, offset=(80, 360))
-		test.name = "menu"
-		self.gui.add_component(test)
-		
-		test = Slider("Another Slider", self.gui, offset=(25, 400))
-		test.name = "notvelocity"
-		self.gui.add_component(test)
-
-		test = Title("Some Other Title", self.gui, 0, offset=(25, 450))
-		self.gui.add_component(test)
-
-		test = Title("Map Settings", self.gui, 0, offset=(25, 500))
-		self.gui.add_component(test)
-
-		test = Title("Robot Statistics", self.gui, 2, offset=(25, 550))
-		self.gui.add_component(test)
-
-		test = CheckBox("Display Location Overlay", self.gui, offset=(25, 600))
-		test.name = "displaylocation"
-		self.gui.add_component(test)
-
-		test = CheckBox("Display Paths", self.gui, offset=(25, 625))
-		test.name = "displaypath"
-		self.gui.add_component(test)
-
-		test = CheckBox("Display Treasures", self.gui, offset=(25, 650))
-		test.name = "displaytreasure"
-		self.gui.add_component(test)
-
-		test = OrangeLabel("Position (x, y)", "0.0", self.gui, offset=(25, 700))
+		test = OrangeLabel("Position (x, y)", "0.0", self.gui, offset=(25, 240))
 		test.name = "position"
 		self.gui.add_component(test)
 
-		test = OrangeLabel("Bearing (degrees)", "0.0", self.gui, offset=(25, 720))
+		test = OrangeLabel("Bearing (degrees)", "0.0", self.gui, offset=(25, 260))
 		test.name = "bearing"
 		self.gui.add_component(test)
 
-		test = OrangeLabel("Score", "0.0", self.gui, offset=(25, 740))
-		test.name = "position1"
+		test = OrangeLabel("Score", "0.0", self.gui, offset=(25, 280))
+		test.name = "score"
+		self.gui.add_component(test)
+
+		test = OrangeLabel("", "N/A", self.gui, offset=(25, 300))
+		test.name = "location"
+		self.gui.add_component(test)
+
+		test = Title("Robot 2 : Automated", self.gui, 0, offset=(25, 310))
+		self.gui.add_component(test)
+
+		test = Slider("Velocity", self.gui, offset=(25, 355), increment=10.0, minvalue=150.0, maxvalue=300.0)
+		test.name = "velocityai"
+		self.gui.add_component(test)
+
+		test = OrangeLabel("Position (x, y)", "0.0", self.gui, offset=(25, 405))
+		test.name = "positionai"
+		self.gui.add_component(test)
+
+		test = OrangeLabel("Bearing (degrees)", "0.0", self.gui, offset=(25, 425))
+		test.name = "bearingai"
+		self.gui.add_component(test)
+
+		test = OrangeLabel("Score", "0.0", self.gui, offset=(25, 445))
+		test.name = "scoreai"
+		self.gui.add_component(test)
+
+		test = OrangeLabel("", "N/A", self.gui, offset=(25, 465))
+		test.name = "locationai"
+		self.gui.add_component(test)
+
+		test = Title("General Settings", self.gui, 2, offset=(25, 475))
+		self.gui.add_component(test)
+
+		#test1 = FlashingLabel("Pulsating Label", self.gui, offset=(25, 300))
+		#test1.name = "test"
+		#self.gui.add_component(test1)
+
+		test1 = TrafficLight(self.gui, offset=(180, 530))
+		test1.name = "light"
+		self.gui.add_component(test1)
+
+		test1 = Button("Pause", 3, self.gui, offset=(60, 530))
+		test1.name = "pause"
+		self.gui.add_component(test1)
+
+		test = Button("Menu", 1, self.gui, offset=(60, 560))
+		test.name = "menu"
+		self.gui.add_component(test)
+
+		test = CheckBox("Display Treasures", self.gui, offset=(25, 675))
+		test.name = "displaytreasure"
+		self.gui.add_component(test)
+
+		test = CheckBox("Display Paths", self.gui, offset=(25, 700))
+		test.name = "displaypath"
+		self.gui.add_component(test)
+
+		#test = CheckBox("Display Treasures", self.gui, offset=(25, 650))
+		#test.name = "displaytreasure"
+		#self.gui.add_component(test)
+
+		test = OrangeLabel("Time Running", "0.0", self.gui, offset=(25, 730))
+		test.name = "time"
+		self.gui.add_component(test)
+
+		test = OrangeLabel("FPS", "0.0", self.gui, offset=(25, 750))
+		test.name = "fps"
 		self.gui.add_component(test)
 
 		self.thread = None
@@ -159,9 +191,13 @@ class GameSurface(Level, IEventHandler):
 		Level.__init__(self, size=(600, 800))
 		IEventHandler.__init__(self)
 		self.parent = parent
-		self.mapimg = pygame.image.load("assets/img/map.png")
+		self.mapimg = pygame.image.load(json_settings["map_img"])
 		self.rect = self.mapimg.get_rect()
 		self.blit(self.mapimg, self.rect)
+		self.landmarks = []
+		self.display_treasures = False
+		for landmark in json_settings["landmarks"]:
+			self.landmarks.append(Landmark(**landmark))
 
 		self.update_timer = 0
 
@@ -169,7 +205,7 @@ class GameSurface(Level, IEventHandler):
 		place = 100
 		col = 0
 		row = 0
-		for i in range(0, 5):
+		for i in range(0, 2):
 			col += 1
 			robot = Robot(self)
 			print i*place
@@ -179,32 +215,86 @@ class GameSurface(Level, IEventHandler):
 			if col > 4: col = 0; row += 1
 		self.robot = self.known_entities[0]
 
+		self.known_entities[0].type = ""
+
+		self.treasures = []
+
+		self.treasures.append(Treasure(self))
+		self.treasures.append(Treasure(self))
+		self.treasures.append(Treasure(self))
+
 	def update(self, time, events):
 
 		for entity in self.known_entities:
 			self.blit(self.mapimg.subsurface(entity.previous_rect.x, entity.previous_rect.y, entity.previous_rect.width, entity.previous_rect.height), entity.previous_rect)
+		
 		# do some updates to the gui
 		if self.update_timer > 0.25:
 			self.update_timer = 0
 			EventDispatcher().send_event(LabelChange("bearing", str(self.robot.bearing)))
 			EventDispatcher().send_event(LabelChange("position", "(" + str(self.robot.rect.x) + ", " + str(self.robot.rect.y) + ")"))
 
+			points = pygame.sprite.spritecollide(self.robot, self.landmarks, False)
+			if len(points) > 0:
+				loc = ""
+				for landmark in points:
+					loc += landmark.name + "/"
+				EventDispatcher().send_event(LabelChange("location", loc))
+
+			else:
+				EventDispatcher().send_event(LabelChange("location", "N/A"))
+
+
+			EventDispatcher().send_event(LabelChange("bearingai", str(self.known_entities[1].bearing)))
+			EventDispatcher().send_event(LabelChange("positionai", "(" + str(self.known_entities[1].rect.x) + ", " + str(self.known_entities[1].rect.y) + ")"))
+
+			points = pygame.sprite.spritecollide(self.known_entities[1], self.landmarks, False)
+			if len(points) > 0:
+				loc = ""
+				for landmark in points:
+					loc += landmark.name + "/"
+				EventDispatcher().send_event(LabelChange("locationai", loc))
+
+			else:
+				EventDispatcher().send_event(LabelChange("locationai", "N/A"))
+
 		self.update_timer += time
-		# this is very efficient
-		#self.blit(self.mapimg.subsurface(self.testrect.x, self.testrect.y, self.testrect.width, self.testrect.height), self.testrect)
+
+		'''
+		if len(self.treasures) is not 3:
+			self.treasures.append(Treasure(self))
+			self.treasures.append(Treasure(self))
+			self.treasures.append(Treasure(self))
+		'''
+
+		for treasure in self.treasures:
+			collision = False
+			for entity in self.known_entities:
+				if entity.rect.colliderect(treasure.rect):
+					collision = True
+					self.blit(self.mapimg.subsurface(treasure.rect.x, treasure.rect.y, treasure.rect.width, treasure.rect.height), treasure.rect)
+					entity.score += treasure.score
+					EventDispatcher().send_event(LabelChange(str("score"+entity.type), str(entity.score)))
+					self.treasures.remove(treasure)
+					continue
+			if not collision:
+				self.blit(self.mapimg.subsurface(treasure.rect.x, treasure.rect.y, treasure.rect.width, treasure.rect.height), treasure.rect)
+				treasure.update(time, events)
 
 		for entity in self.known_entities:
-			entity.update(time, events, self.known_entities)
+			entity.update(time, events)
+
+		if len(self.treasures) == 0:
+			for i in range(0, 3):
+				self.treasures.append(Treasure(self))
 
 		self.parent.blit(self, self.rect)
 
+	# override the blit method in case we need to do anything with it later on
 	def blit(self, surface, rect):
 		super(Level, self).blit(surface, rect)
 
 	def event_handler(self, event):
-		#print event.name
-		#if event.istype(SliderEvent) and event.name is "velocity":
-		#	self.velocity[0], self.velocity[1] = event.slidervalue, event.slidervalue
 		if event.istype(CheckBoxEvent) and event.name is "displaypath":
 			if event.checked:
 				self.color = (255, 255, 255)
@@ -219,7 +309,10 @@ class GameSurface(Level, IEventHandler):
 			self.robot.timer = 0
 		if event.istype(SliderEvent) and event.name is "velocity":
 			self.robot.velocity = event.slidervalue
-
+		if event.istype(SliderEvent) and event.name is "velocityai":
+			self.known_entities[1].velocity = event.slidervalue
+		if event.istype(CheckBoxEvent) and event.name is "displaytreasure":
+			self.display_treasures = event.checked
 
 class PauseMenu(Level, IEventHandler):
 

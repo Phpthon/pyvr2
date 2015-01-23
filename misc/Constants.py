@@ -1,3 +1,6 @@
+import math
+import json
+
 MAIN_FONT = "Lucida Sans"
 FONT_REGULAR = "assets/font/lsans.ttf"
 FONT_BOLD = "assets/font/lsans_b.ttf"
@@ -5,9 +8,6 @@ SOFTWARE_VERSION = "v1.01"
 
 LEVEL_MAIN_MENU = 0
 LEVEL_GAME = 1
-
-import math
-
 
 # constant arrays used for distance calculations
 angles = [0, 90, 180, 270, 360]
@@ -33,5 +33,6 @@ def bearing_conversion(bearing, velocity):
 			ydir = yvals[i] * velocity * math.cos(radians(angle))
 			return (angle, radians(angle), xdir, ydir, direct[i])
 
-
-print bearing_conversion(0, 10)
+json_file = open("assets/settings.json")
+json_settings = json.load(json_file)
+json_file.close()
